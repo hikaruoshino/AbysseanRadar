@@ -8,6 +8,8 @@
          powershell -ExecutionPolicy Bypass -File convert_maps.ps1 -Source "C:\...\mappy--Kenshi-Version-master\Maps"
        ゾーンを絞るとき (例: アビセア-ウルガラン = fd、グロウベルグ = fe):
          powershell -ExecutionPolicy Bypass -File convert_maps.ps1 -Source "C:\...\Maps" -Zones fd,fe
+       全ゾーンを変換するとき (約 300 ゾーン・約 120 万ファイル・約 1.5GB。20 分ほどかかります):
+         powershell -ExecutionPolicy Bypass -File convert_maps.ps1 -Source "C:\...\Maps" -Zones all
 
   やること:
     - Source の中の <ゾーン番号の16進数>_0.gif (と .png) を、8x8 の欠片 (64 x 64 枚 = 4096 枚) の PNG にして、AbysseanRadar\maps\<ゾーン>_0\ に置く (最初の地図だけ)
@@ -35,6 +37,8 @@ Copy-Item -LiteralPath $ini -Destination (Join-Path $dest "map.ini") -Force
 if ($Zones.Count -eq 0) { $Zones = @("0f", "2d", "84", "d7", "d8", "d9", "da", "fd", "fe", "ff") }
 $want = @{}
 foreach ($z in $Zones) { foreach ($part in ($z -split ",")) { if ($part.Trim()) { $want[$part.Trim().ToLower()] = $true } } }
+# -Zones all のときは、全ゾーンを変換する (約 300 ゾーン・約 120 万ファイル・約 1.5GB。20 分ほどかかる)
+if ($want.ContainsKey("all")) { $want = @{} }
 
 $converted = 0
 $tile = 8
