@@ -8,7 +8,7 @@ Abyssean NMs are invisible. When you heal while holding the right jade, the game
 
 ![Radar example](images/radar-example.png)
 
-> ⚠️ **Japanese client only (for now).** The addon reads only the **Japanese-client** jade messages (it looks for `光を発した` and `Ym先`). I have not checked the message format of the English client, so it **cannot read it**. The in-game messages the addon prints are also Japanese. Sorry about that - I am posting this README so you know what it is and what it needs. If enough people are interested, I will make an English-client edition (that needs real chat logs from the English client, so a little help from English-client players would be welcome - please open an issue).
+> **Japanese client only.** The addon reads only the Japanese-client jade messages (it looks for `光を発した` and `Ym先`). The English-client message format has not been checked, so it cannot read them. The addon's own chat messages are in Japanese. If you play on the English client and want to help, please open an issue with a sample of the message.
 >
 > Confirmed in game (2026-10-17, Japanese client, Abyssea - Uleguerand etc.): position estimation, radar and map display / moving / zooming, right-click display switching, the chat notice when you get close, color and opacity settings, wav sounds, and the truth check after the NM appears.
 > Not confirmed: the English client, a real fourth-stage ("violently") NM, and the wording for 16 directions (I have only seen 8).
@@ -17,13 +17,13 @@ Abyssean NMs are invisible. When you heal while holding the right jade, the game
 
 ## What it does
 
-* **Estimates the NM's position from the healing results.** One result only gives one of 8 directions (45 degrees wide), so it is wide at first. After 3-5 results from different places it narrows down to a few yalms.
+* **Estimates the NM's position from the healing results.** One result only gives one of 8 directions (45 degrees wide), so it is wide at first. After 3-5 results from different places, taken while moving closer, it narrows to within a few yalms.
 * **Older measurements are trusted less, because NMs move.** The maximum speed is 1.5 yalms/s (change it with `//ar speed`). If the target seems to be moving, a small movement arrow is shown too.
 * **Tracks each stage and each color separately.** The vibration wording (a little / a lot / powerfully / violently) gives the stage (small / large / strong / intense). It is shown next to the star as a kanji and the star color changes (small = light blue, large = orange, strong = red, intense = purple). Up to 3 are shown at once.
 * **Can show a circular map with you in the center.** If you have the map of the zone, a map is shown instead of the radar (see below for preparing maps). North is up.
-* **Tells you in chat when you get close.** "Getting close" at 30 m or less and "Very close" at 10 m or less. The distances can be changed. If you put your own wav files in, it can play a sound too (optional).
+* **Tells you in chat when you get close.** "Getting close" at 30 m or less and "Very close" at 10 m or less. The distances can be changed. To get a sound, put your own `sounds/near.wav` and `sounds/close.wav` in place and run `//ar sound on` (off by default, optional).
 * **Checks the answer.** When the NM appears, the addon compares the position of the nearby enemy in battle with its last estimate and prints the difference in chat.
-* **Sends nothing to the game server.** It only receives the chat log and reads your own coordinates. It does not read or write game memory, and it does not press keys or use abilities for you.
+* **Sends nothing to the game server.** It only reads the chat log and the coordinates of you and of nearby enemies through the Windower API. There is no code that reads or writes game memory or sends anything to the server, and it does not press keys or use abilities for you.
 
 ## Measured accuracy
 
@@ -31,12 +31,11 @@ The difference between the real position where the NM appeared and the last esti
 
 | NM | Stage | Measurements | Error |
 |---|---|---|---|
-| Tammuz | 2nd | - | about 2 m |
 | Chesma | 2nd | 3 | 1.4 m |
 | Chione | 2nd | 9 | 2.8 m |
 | Dawon | 3rd | - | 3.8 m |
 
-The jade reacts from far away (a reading of 224 yalms was seen). The first reading is wide (around +/-50 m), but it narrows when you get closer and measure again.
+The table is my own record. In every case the last measurement was taken within 20 yalms of the target. The jade reacts from far away (a reading of 224 yalms was seen). The first reading is wide (around +/-50 m), but it narrows when you get closer and measure again.
 
 ## Installation
 
@@ -81,10 +80,10 @@ The map images are **not included**. They are the work of the authors of mappy a
    powershell -ExecutionPolicy Bypass -File tools\convert_maps.ps1 -Source "C:\...\mappy--Kenshi-Version-master\Maps"
    ```
 
-   You can limit the zones with hexadecimal zone numbers, for example `-Zones fd,fe`. Without it, the 10 Abyssea zones are converted. One zone makes 4096 tiles, so converting all zones is not the default. To convert every zone, add `-Zones all` (about 300 zones, about 1.2 million files, about 1.5 GB, around 20 minutes).
-3. Map tiles (8x8 pixel PNGs) and the alignment data (`map.ini`) go into the `maps/` folder. If `//ar status` shows "map: on (this zone: yes)" in game, it works. (The addon's own messages are in Japanese.)
+   You can limit the zones with hexadecimal zone numbers, for example `-Zones fd,fe`. Without it, the 10 Abyssea zones are converted. If you need maps for other zones, such as field zones, add their zone numbers to `-Zones`. One zone makes 4096 tiles, so converting all zones is not the default. To convert every zone, add `-Zones all` (about 300 zones, about 1.2 million files, about 1.5 GB, around 20 minutes).
+3. Map tiles (8x8 pixel PNGs) and the alignment data (`map.ini`) go into the `maps/` folder. If `//ar status` shows "地図: オン (このゾーン: あり)" (map: on, this zone: yes) in game, it works. (The addon's own messages are in Japanese.)
 
-Windower's `images` has no way to crop an image, so the map is split into small tiles and only the visible tiles are laid out. The overflow is hidden with a ring image around the edge. The higher the zoom, the more tiles overflow, so the ring gets thicker (it is chosen automatically within the range where nothing is cut off, and the maximum zoom is kept in that range too). The picture becomes a little coarse.
+Windower's `images` has no way to crop an image, so the map is split into small tiles and only the visible tiles are laid out. The overflow is hidden with a ring image around the edge. The higher the zoom, the more tiles overflow, so the ring gets thicker (it is chosen automatically within the range where nothing is cut off, and the maximum zoom is kept in that range too). The image looks a bit coarser.
 
 ## Commands
 
@@ -108,7 +107,7 @@ Windower's `images` has no way to crop an image, so the map is split into small 
 | `//ar speed <yalms/s>` | Maximum speed an NM may move (default 1.5) |
 | `//ar clear` | Clear the tracking |
 | `//ar status` | Show the current tracking and settings |
-| `//ar truth` | Target the NM that appeared and hit it to print the difference between its real position and the estimate (truth check) |
+| `//ar truth` | Target the NM that has appeared and type this to print the difference between its real position and the estimate (truth check) |
 | `//ar last` | Show recent records |
 | `//ar log [on\|off]` | Turn the record (`data/ping.log`) on / off |
 
@@ -116,14 +115,14 @@ The stage for `//ar color` is written with the kanji the addon uses (小 / 大 /
 
 ## About the record
 
-`data/ping.log` records the jade messages together with your coordinates, facing and time (for researching the message format and checking accuracy). **It is saved only on your own PC and is never sent anywhere.** You can stop it with `//ar log off`.
+`data/ping.log` records the jade and appearance chat lines (including the visitant timer and glow lines) together with your coordinates, facing and time, for researching the message format and checking accuracy. It is on by default. **It is saved only on your own PC and is never sent anywhere.** You can stop it with `//ar log off`.
 
 ## Notes
 
 * The NM's position is an **estimate**. Directions are rounded to 8 directions, so the error depends on the number and places of measurements.
 * The estimate assumes the NM does not move much and only allows for the maximum speed. A long time after the measurement, the estimate drifts.
 * The map alignment values come from mappy's `map.ini`. In some zones the map may be slightly off.
-* **Use it at your own risk.** The addon only receives and displays information and sends nothing to the server, but I cannot guarantee that it does not break the game's rules. Please check the rules of your server / linkshell too.
+* Third-party tools, Windower included, are prohibited by the FFXI Terms of Service. I cannot guarantee that this addon is allowed or that it will not be detected. Use it at your own risk; the author accepts no responsibility for any consequences.
 
 ## Credits and license
 
