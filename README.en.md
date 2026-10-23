@@ -31,9 +31,10 @@ The difference between the real position where the NM appeared and the last esti
 
 | NM | Stage | Measurements | Error |
 |---|---|---|---|
-| Chesma | 2nd | 3 | 1.4 m |
-| Chione | 2nd | 9 | 2.8 m |
-| Dawon | 3rd | - | 3.8 m |
+| Tammuz | 2nd | - | about 2 yalms |
+| Chesma | 2nd | 3 | 1.4 yalms |
+| Chione | 2nd | 9 | 2.8 yalms |
+| Dawon | 3rd | - | 3.8 yalms |
 
 The table is my own record. In every case the last measurement was taken within 20 yalms of the target. The jade reacts from far away (a reading of 224 yalms was seen). The first reading is wide (around +/-50 m), but it narrows when you get closer and measure again.
 
