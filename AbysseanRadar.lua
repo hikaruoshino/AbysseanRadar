@@ -19,7 +19,7 @@
 --   - レーダーはマウスでドラッグして動かせる。ホイールで範囲を変えられる (v0.3.0)
 --   - 表示の向きは 2 通り (//ar mode): 自分が向いている方が上 (heading、既定) / 北が上 (north)
 --   - 右クリック (レーダーの上) で、表示の向きを切り替える (v0.5.0)
---   - 近づいたらチャットで知らせる (v0.5.0)。既定は 30m と 10m。sounds/near.wav・sounds/close.wav を置くと、音も鳴る (任意)
+--   - 近づいたらチャットで知らせる (v0.5.0)。既定は 30Ym と 10Ym。sounds/near.wav・sounds/close.wav を置くと、音も鳴る (任意)
 --   - 色・透明度・知らせの距離は //ar color / alpha / near / close / notify / sound で変えられる
 --   - 地図 (v0.6.0): そのゾーンの地図があれば、レーダーの代わりに、自分を中央に置いた円形の地図 (北が上) を出す。
 --     地図の画像は同梱しない。tools/convert_maps.ps1 で、自分で取得した mappy の地図 (GIF) を小さな欠片の PNG にして maps/ に置く。
@@ -225,7 +225,7 @@ local function report_truth(mob, how)
     end
     if not mob or not mob.x or not mob.y then return end
     local err = math.sqrt((mob.x - last_est.x) ^ 2 + (mob.y - last_est.y) ^ 2)
-    chat(string.format("[AbysseanRadar] 答え合わせ (%s): 実際 X %.0f Y %.0f / 推定 X %.0f Y %.0f ±%.0fm / ずれ 約 %.0fm",
+    chat(string.format("[AbysseanRadar] 答え合わせ (%s): 実際 X %.0f Y %.0f / 推定 X %.0f Y %.0f ±%.0fYm / ずれ 約 %.0fYm",
         how, mob.x, mob.y, last_est.x, last_est.y, last_est.radius, err), 209)
     record("答え合わせ", "-", string.format(" truth=(%.1f,%.1f) est=(%.1f,%.1f) radius=%.1f err=%.1f who=%s",
         mob.x, mob.y, last_est.x, last_est.y, last_est.radius, err, tostring(mob.name)))
@@ -591,13 +591,13 @@ check_near = function(list, me, now)
             if dist <= close and level < 2 then
                 level = 2
                 if settings.notify then
-                    chat(string.format("[AbysseanRadar] %s: すぐ近くです！ %s %s 約 %.0fm (±%.0fm)", mark, arrow, name, dist, e.radius), 204)
+                    chat(string.format("[AbysseanRadar] %s: すぐ近くです！ %s %s 約 %.0fYm (±%.0fYm)", mark, arrow, name, dist, e.radius), 204)
                 end
                 play_alert("close")
             elseif dist <= near and level < 1 then
                 level = 1
                 if settings.notify then
-                    chat(string.format("[AbysseanRadar] %s: 近づきました。%s %s 約 %.0fm (±%.0fm)", mark, arrow, name, dist, e.radius), 209)
+                    chat(string.format("[AbysseanRadar] %s: 近づきました。%s %s 約 %.0fYm (±%.0fYm)", mark, arrow, name, dist, e.radius), 209)
                 end
                 play_alert("near")
             end
@@ -721,7 +721,7 @@ local function refresh()
     local use_map = map_active()
     local g = use_map and map_geom() or nil
     local view = use_map and string.format("地図 (北が上) 倍率 %.2f", g.z)
-        or string.format("%s / 範囲 %dm", MODE_LABEL[settings.mode] or settings.mode, settings.range)
+        or string.format("%s / 範囲 %dYm", MODE_LABEL[settings.mode] or settings.mode, settings.range)
     local lines = {color_text("AbysseanRadar", 255, 255, 255) .. color_text(string.format("  表示: %s (右クリックで切替・ホイールで拡大縮小)", view), 150, 150, 150)}
     local function describe(track, detailed)
         local e = track.est
@@ -734,17 +734,17 @@ local function refresh()
         if not detailed then
             if e then
                 local name, arrow, dist = radar_math.compass(e.x - me.x, e.y - me.y)
-                lines[#lines + 1] = string.format("%s %s%s: %s %s 約 %.0fm ±%.0fm (%d秒前)", mark, track.color, stage, arrow, name, dist, e.radius, age)
+                lines[#lines + 1] = string.format("%s %s%s: %s %s 約 %.0fYm ±%.0fYm (%d秒前)", mark, track.color, stage, arrow, name, dist, e.radius, age)
             end
             return
         end
         lines[#lines + 1] = mark .. " " .. track.color .. stage .. string.format(" (%d回測定)", #track.pings)
         if e then
             local name, arrow, dist = radar_math.compass(e.x - me.x, e.y - me.y)
-            lines[#lines + 1] = string.format("推定: X %.0f Y %.0f  (誤差 ±%.0fm = %s)", e.x, e.y, e.radius, radar_math.quality(e.radius))
-            lines[#lines + 1] = color_text(string.format("%s %s 約 %.0fm", arrow, name, dist), 255, 220, 100)
+            lines[#lines + 1] = string.format("推定: X %.0f Y %.0f  (誤差 ±%.0fYm = %s)", e.x, e.y, e.radius, radar_math.quality(e.radius))
+            lines[#lines + 1] = color_text(string.format("%s %s 約 %.0fYm", arrow, name, dist), 255, 220, 100)
             if velocity then
-                lines[#lines + 1] = string.format("動き: %sへ 約 %.1fm/秒", (radar_math.compass(velocity.vx, velocity.vy)), velocity.speed)
+                lines[#lines + 1] = string.format("動き: %sへ 約 %.1fYm/秒", (radar_math.compass(velocity.vx, velocity.vy)), velocity.speed)
             end
         end
         lines[#lines + 1] = string.format("最終測定 %d 秒前 (%s %dYm)", age, last.dir, last.dist)
@@ -1007,7 +1007,7 @@ windower.register_event("addon command", function(cmd, ...)
         elseif cmd == "notify" then
             settings.notify = on_off(args[1] and args[1]:lower(), settings.notify)
             config.save(settings)
-            chat(string.format("[AbysseanRadar] 近づいたときのチャットの知らせ: %s (%dm と %dm)", settings.notify and "オン" or "オフ", settings.notify_near, settings.notify_close))
+            chat(string.format("[AbysseanRadar] 近づいたときのチャットの知らせ: %s (%dYm と %dYm)", settings.notify and "オン" or "オフ", settings.notify_near, settings.notify_close))
         elseif cmd == "sound" then
             settings.sound = on_off(args[1] and args[1]:lower(), settings.sound)
             config.save(settings)
@@ -1016,11 +1016,11 @@ windower.register_event("addon command", function(cmd, ...)
             settings.notify_near = math.max(2, math.min(300, tonumber(args[1])))
             if settings.notify_close >= settings.notify_near then settings.notify_close = math.max(1, settings.notify_near / 2) end
             config.save(settings)
-            chat(string.format("[AbysseanRadar] 「近づきました」の距離を %.0fm にしました (すぐ近く = %.0fm)", settings.notify_near, settings.notify_close))
+            chat(string.format("[AbysseanRadar] 「近づきました」の距離を %.0fYm にしました (すぐ近く = %.0fYm)", settings.notify_near, settings.notify_close))
         elseif cmd == "close" and tonumber(args[1]) then
             settings.notify_close = math.max(1, math.min(tonumber(args[1]), settings.notify_near - 1))
             config.save(settings)
-            chat(string.format("[AbysseanRadar] 「すぐ近く」の距離を %.0fm にしました (近づきました = %.0fm)", settings.notify_close, settings.notify_near))
+            chat(string.format("[AbysseanRadar] 「すぐ近く」の距離を %.0fYm にしました (近づきました = %.0fYm)", settings.notify_close, settings.notify_near))
         elseif cmd == "alpha" and tonumber(args[1]) then
             settings.alpha = math.max(0, math.min(255, math.floor(tonumber(args[1]))))
             config.save(settings)
@@ -1059,10 +1059,10 @@ windower.register_event("addon command", function(cmd, ...)
                 n = n + 1
                 local e = track.est
                 chat(string.format("  %s %s: %d回測定%s", STAGE_MARK[track.stage or 0] or "?", track.color, #track.pings,
-                    e and string.format(" / 推定 X %.0f Y %.0f ±%.0fm", e.x, e.y, e.radius) or ""))
+                    e and string.format(" / 推定 X %.0f Y %.0f ±%.0fYm", e.x, e.y, e.radius) or ""))
             end
             if n == 0 then chat("[AbysseanRadar] 追跡中のアビセアンはありません") end
-            chat(string.format("[AbysseanRadar] 知らせ: チャット %s / 音 %s (近づきました %.0fm・すぐ近く %.0fm) / 背景の濃さ %d",
+            chat(string.format("[AbysseanRadar] 知らせ: チャット %s / 音 %s (近づきました %.0fYm・すぐ近く %.0fYm) / 背景の濃さ %d",
                 settings.notify and "オン" or "オフ", settings.sound and "オン" or "オフ", settings.notify_near, settings.notify_close, settings.alpha))
             chat(string.format("[AbysseanRadar] 記録 %s / 今回の記録 %d 行", settings.logging and "オン" or "オフ", logged))
             chat(string.format("[AbysseanRadar] 地図: %s (このゾーン: %s)", settings.map and "オン" or "オフ", map_state.dir and "あり" or "なし"))
