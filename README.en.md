@@ -21,7 +21,7 @@ Abyssean NMs are invisible. When you heal while holding the right jade, the game
 * **Older measurements are trusted less, because NMs move.** The maximum speed is 1.5 yalms/s (change it with `//ar speed`). If the target seems to be moving, a small movement arrow is shown too.
 * **Tracks each stage and each color separately.** The vibration wording (a little / a lot / powerfully / violently) gives the stage (small / large / strong / intense). It is shown next to the star as a kanji and the star color changes (small = light blue, large = orange, strong = red, intense = purple). Up to 3 are shown at once.
 * **Can show a circular map with you in the center.** If you have the map of the zone, a map is shown instead of the radar (see below for preparing maps). North is up.
-* **Tells you in chat when you get close.** "Getting close" at 30 m or less and "Very close" at 10 m or less. The distances can be changed. To get a sound, put your own `sounds/near.wav` and `sounds/close.wav` in place and run `//ar sound on` (off by default, optional).
+* **Tells you in chat when you get close.** "Getting close" at 30 yalms or less and "Very close" at 10 yalms or less. The distances can be changed. To get a sound, put your own `sounds/near.wav` and `sounds/close.wav` in place and run `//ar sound on` (off by default, optional).
 * **Checks the answer.** When the NM appears, the addon compares the position of the nearby enemy in battle with its last estimate and prints the difference in chat.
 * **Sends nothing to the game server.** It only reads the chat log and the coordinates of you and of nearby enemies through the Windower API. There is no code that reads or writes game memory or sends anything to the server, and it does not press keys or use abilities for you.
 
@@ -36,7 +36,7 @@ The difference between the real position where the NM appeared and the last esti
 | Chione | 2nd | 9 | 2.8 yalms |
 | Dawon | 3rd | - | 3.8 yalms |
 
-The table is my own record. In every case the last measurement was taken within 20 yalms of the target. The jade reacts from far away (a reading of 224 yalms was seen). The first reading is wide (around +/-50 m), but it narrows when you get closer and measure again.
+The table is my own record. In every case the last measurement was taken within 20 yalms of the target. The jade reacts from far away (a reading of 224 yalms was seen). The first reading is wide (around +/-50 yalms), but it narrows when you get closer and measure again.
 
 ## Installation
 
@@ -48,7 +48,7 @@ The table is my own record. In every case the last measurement was taken within 
 
 1. In Abyssea, hold the right jade and heal. When a direction and distance appear, a star appears on the radar.
 2. **Move to another place** and heal again. The ring around the star (the possible area) gets smaller.
-3. The text box shows how well it is narrowed down: "error +/-N m = nearly exact / roughly / still wide". If it says "still wide", measure a few more times.
+3. The text box shows how well it is narrowed down: "error +/-N yalms = nearly exact / roughly / still wide". If it says "still wide", measure a few more times.
 4. When you get close, it tells you in chat.
 
 ### Reading the screen
