@@ -130,3 +130,7 @@ The stage for `//ar color` is written with the kanji the addon uses (小 / 大 /
 * Code and images (`images/`): MIT License (`LICENSE`)
 * The map images and the alignment data (`map.ini`) belong to the authors of mappy and ffassist. **They are not included in this repository.**
 * It uses Windower 4's `config`, `texts` and `images` libraries.
+
+## Feedback
+
+A one-line "it works" is welcome too. With a GitHub account you can post from [Issues](../../issues/new/choose).

@@ -128,3 +128,9 @@
 * コードと画像（`images/`）: MIT License（`LICENSE`）
 * 地図の画像と座標の合わせ方（`map.ini`）は、mappy・ffassist の作者たちのものです。**このリポジトリには含みません。**
 * Windower 4 の `config`・`texts`・`images` ライブラリを使います。
+
+## 不具合・動作報告 / Feedback
+
+「動きました」の一言だけでも歓迎です。GitHub のアカウントがあれば、[Issues](../../issues/new/choose) から書き込めます (日本語・英語どちらでも)。
+
+A one-line "it works" is welcome too. With a GitHub account you can post from [Issues](../../issues/new/choose) (Japanese or English).
