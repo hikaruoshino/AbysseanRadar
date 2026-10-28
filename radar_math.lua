@@ -93,44 +93,64 @@ function M.estimate(pings, now, opts)
     local margin = maxd * 0.5 + 10
     minx, maxx, miny, maxy = minx - margin, maxx + margin, miny - margin, maxy + margin
 
+    -- 各測定の定数を先に配列へ (cost_at は格子の点ごとに何千回も呼ばれる)。計算の式と足す順番は変えない
+    local n_used = #used
+    local U_px, U_py, U_dist, U_bear, U_half, U_slack, U_sd = {}, {}, {}, {}, {}, {}, {}
+    for i, u in ipairs(used) do
+        local p = u.p
+        U_px[i], U_py[i], U_dist[i], U_bear[i] = p.px, p.py, p.dist, p.bearing
+        U_half[i] = p.half or M.HALF_8
+        U_slack[i] = speed * u.age                            -- この測定から標的が動けた距離
+        U_sd[i] = 2 + 0.06 * p.dist                           -- 距離の読みの幅 (四捨五入と誤差)
+    end
+    local sqrt, abs, atan2, sin = math.sqrt, math.abs, math.atan2, math.sin
+    local TWO_PI, HALF_PI = 2 * PI, PI / 2
+
     local function cost_at(x, y)
         local c = 0
-        for _, u in ipairs(used) do
-            local p = u.p
-            local slack = speed * u.age                       -- この測定から標的が動けた距離
-            local dx, dy = x - p.px, y - p.py
-            local d = math.sqrt(dx * dx + dy * dy)
-            local sd = 2 + 0.06 * p.dist                      -- 距離の読みの幅 (四捨五入と誤差)
-            local over_d = math.max(0, math.abs(d - p.dist) - sd - slack)
-            local pen = math.max(0, math.abs(angle_diff(math.atan2(dx, dy), p.bearing)) - (p.half or M.HALF_8))
-            local over_l = math.max(0, d * math.sin(math.min(pen, PI / 2)) - slack)   -- 方角の幅からの横のはみ出し
-            c = c + (over_d / 3) ^ 2 + (over_l / 3) ^ 2
+        for i = 1, n_used do
+            local slack = U_slack[i]
+            local dx, dy = x - U_px[i], y - U_py[i]
+            local d = sqrt(dx * dx + dy * dy)
+            local over_d = abs(d - U_dist[i]) - U_sd[i] - slack
+            if over_d < 0 then over_d = 0 end
+            local a = (atan2(dx, dy) - U_bear[i]) % TWO_PI
+            if a > PI then a = a - TWO_PI end
+            local pen = abs(a) - U_half[i]
+            if pen < 0 then pen = 0 elseif pen > HALF_PI then pen = HALF_PI end
+            local over_l = d * sin(pen) - slack               -- 方角の幅からの横のはみ出し
+            if over_l < 0 then over_l = 0 end
+            local qd, ql = over_d / 3, over_l / 3
+            c = c + qd * qd + ql * ql
         end
         return c
     end
 
     -- 格子で調べて、良い点 (最小のコスト + 余裕) の重心と広がりを出す
+    -- (点ごとに表を作らず、x・y・コストを別々の配列に入れる。順番は同じ)
     local function scan(x0, x1, y0, y1, step, tolerance)
-        local cells, best = {}, math.huge
+        local xs, ys, cs, k, best = {}, {}, {}, 0, math.huge
         local y = y0
         while y <= y1 do
             local x = x0
             while x <= x1 do
                 local c = cost_at(x, y)
-                cells[#cells + 1] = {x, y, c}
+                k = k + 1
+                xs[k], ys[k], cs[k] = x, y, c
                 if c < best then best = c end
                 x = x + step
             end
             y = y + step
         end
+        local limit = best + tolerance
         local sx, sy, n = 0, 0, 0
-        for _, cell in ipairs(cells) do
-            if cell[3] <= best + tolerance then sx, sy, n = sx + cell[1], sy + cell[2], n + 1 end
+        for i = 1, k do
+            if cs[i] <= limit then sx, sy, n = sx + xs[i], sy + ys[i], n + 1 end
         end
         local cx, cy = sx / n, sy / n
         local var = 0
-        for _, cell in ipairs(cells) do
-            if cell[3] <= best + tolerance then var = var + (cell[1] - cx) ^ 2 + (cell[2] - cy) ^ 2 end
+        for i = 1, k do
+            if cs[i] <= limit then var = var + (xs[i] - cx) ^ 2 + (ys[i] - cy) ^ 2 end
         end
         return cx, cy, math.sqrt(var / n), best
     end

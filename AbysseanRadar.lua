@@ -1,5 +1,5 @@
 -- =============================================================================
--- AbysseanRadar.lua : アビセアン (不可視の NM) の追跡アドオン (v0.6.0)
+-- AbysseanRadar.lua : アビセアン (不可視の NM) の追跡アドオン (v0.6.1)
 -- =============================================================================
 -- 【目的】
 -- アビセアンは、ジェイドを持ってヒーリングすると、方角と距離がチャットログに出る。
@@ -37,7 +37,7 @@
 
 _addon.name     = "AbysseanRadar"
 _addon.author   = "hikaruoshino"
-_addon.version  = "0.6.0"
+_addon.version  = "0.6.1"
 _addon.commands = {"abyradar", "ar"}
 
 local config = require("config")
@@ -411,8 +411,13 @@ for i = 1, SLOTS do
 end
 local radar_visible = false      -- レーダーを今出しているか (マウスの判定に使う)
 
+local map_shown = false          -- 地図の部品を出しているか (出していなければ、隠す呼び出しを省く)
+local ui_clean = false           -- 文字・レーダー・地図をすべて隠した状態か (追跡が無い間、毎フレーム隠し直さないため)
+
 local function hide_map()
     map_sig = nil
+    if not map_shown then return end
+    map_shown = false
     radar.map_disc:hide(); radar.map_mask:hide(); radar.map_me:hide(); radar.map_me_arrow:hide()
     for _, tile in ipairs(radar.map_tiles) do tile:hide() end
     for i = 1, SLOTS do radar.map_stars[i]:hide(); radar.map_rings[i]:hide() end
@@ -450,6 +455,7 @@ end
 
 local function hide_radar()
     radar_visible = false
+    ui_clean = true
     hide_map()
     hud:hide()
     hide_radar_parts()
@@ -612,6 +618,7 @@ local function round(v) return math.floor(v + 0.5) end
 local function draw_map(list, me, g)
     local cal = map_state.cal
     if not map_active() then hide_map() return end
+    map_shown = true
     local d, r, z, cx, cy = g.d, g.r, g.z, g.cx, g.cy
     local alpha = math.max(0, math.min(255, tonumber(settings.map_alpha) or 200))
     local ppx = 2 * (cal[2] + cal[1] * me.x)          -- 自分の位置 (512 の画像のピクセル)
@@ -714,7 +721,10 @@ local function refresh()
     if me and me.x then calibrate(me, now) end
     local list = settings.show and sorted_tracks(now) or {}
     if active and not tracks[active] then active = nil end
-    if #list == 0 or not me or not me.x then hide_radar() return end
+    if #list == 0 or not me or not me.x then
+        if not ui_clean then hide_radar() end       -- 隠し終えていれば、何もしない (追跡が無い間は、これが毎フレーム通る)
+        return
+    end
     local primary = (active and tracks[active]) or list[1]
 
     -- 文字の枠: 今の追跡 (一番新しい測定) は詳しく、ほかは 1 行で
@@ -765,6 +775,7 @@ local function refresh()
     end
     hud:show()
     radar_visible = true
+    ui_clean = false
     check_near(list, me, now)
     if use_map then
         hide_radar_parts()
@@ -1080,7 +1091,7 @@ windower.register_event("addon command", function(cmd, ...)
             if #recent == 0 then chat("[AbysseanRadar] まだ記録がありません") return end
             for _, line in ipairs(recent) do chat("  " .. line) end
         else
-            chat("[AbysseanRadar] v0.6.0。ジェイドのヒーリングの結果から、アビセアンの位置を推定して、レーダーに出します")
+            chat("[AbysseanRadar] v0.6.1。ジェイドのヒーリングの結果から、アビセアンの位置を推定して、レーダーに出します")
             chat("[AbysseanRadar] 場所を変えて何回かヒーリングすると絞れます。北が上、点は赤 = 推定、黄 = 各回の見込み、輪 = いそうな範囲 (輪が小さいほど絞れている)")
             chat("[AbysseanRadar] //ar hud [on|off] / mode [north|heading] / clear / range <ヤルム> / size <px> / speed <ヤルム/秒> / pos <X> <Y> / status / last / log [on|off]")
             chat("[AbysseanRadar] 地図: map [on|off] / mapsize <円の直径px> / mapzoom <倍率> / mapalpha <0-255> (地図はレーダーの代わりに出る。ドラッグ = 移動、ホイール = 拡大、右クリック = 表示の切替。地図は tools/convert_maps.ps1 で用意します。README を見てください)")

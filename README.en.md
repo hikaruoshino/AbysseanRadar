@@ -1,4 +1,4 @@
-# AbysseanRadar (v0.6.0)
+# AbysseanRadar (v0.6.1)
 
 **An addon for FFXI (Windower 4) that estimates where an invisible Abyssean NM is and shows it on a radar or map.**
 

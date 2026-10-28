@@ -1,4 +1,4 @@
-# AbysseanRadar (v0.6.0)
+# AbysseanRadar (v0.6.1)
 
 **FFXI（Windower 4 用） アビセアン（見えない NM）の位置を推定して、レーダーと地図に出すアドオン**
 
